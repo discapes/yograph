@@ -8,7 +8,6 @@ beautifulsoup4 = "*"
 httpx = "*"
 matplotlib = "*"
 numpy = "*"
-toolz = "*"
 hishel = "*"
 
 [dev-packages]

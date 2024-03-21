@@ -1,2 +1,5 @@
 Pipfile.lock
 .cache
+__pycache__
+*.csv
+*.csv#
