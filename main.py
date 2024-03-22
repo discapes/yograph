@@ -35,8 +35,8 @@ async def main():
   #  draw_line_chart([x for x in yle_results if x.question == "grade" and x.subject == "Matematiikka (pitkä)"], "semester", "answers", "option", "YLEn kysely - Matematiikka (pitkä)", percent_cats=True)
     #draw_line_chart([x for x in ytl_results if x.grade == "L"], "semester", "value", "subject", "YTL pisterajat - Laudatur")
     #draw_line_chart([x for x in ytl_results if x.subject == "Matematiikka (pitkä)"], "semester", "value", "grade", "YTL pisterajat - Matematiikka (pitkä)")
-    ds1 = DataSource([x for x in yle_results if x.option in ["L", "E", "En uskalla edes arvata"] and x.subject == "Matematiikka (pitkä)"], "answers", "option", True)
-    ds2 = DataSource([x for x in ytl_results if x.grade == "L" and x.subject == "Matematiikka (pitkä)"], "value", None, False)
+    ds1 = DataSource([x for x in yle_results if  x.question == "grade" and x.subject == "Englanti (pitkä)"], "answers", "option", True)
+    ds2 = DataSource([x for x in ytl_results if x.grade == "L" and x.subject == "Englanti (pitkä)"], "value", None, False)
     draw_line_chart(ds1, ds2, "semester", "YLEn kysely - Matematiikka (pitkä)")
     
     #output_csv(yle_results, file_name="yle.csv")
