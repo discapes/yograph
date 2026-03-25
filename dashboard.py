@@ -67,24 +67,36 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
       --muted: #6e665d;
       --accent: #165d8a;
       --accent-2: #b6592b;
+      --accent-3: #25724d;
+      --shadow: 0 10px 28px rgba(70, 52, 28, 0.08);
       font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
     }}
     * {{ box-sizing: border-box; }}
+    html {{
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.65), transparent 34%),
+        linear-gradient(180deg, #f8f3ea 0%, var(--bg) 48%, #efe7d8 100%);
+    }}
     body {{
       margin: 0;
       color: var(--ink);
-      background: var(--bg);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(255, 255, 255, 0.65), transparent 34%),
+        linear-gradient(180deg, #f8f3ea 0%, var(--bg) 48%, #efe7d8 100%);
+      background-attachment: fixed;
     }}
     main {{
       max-width: 1120px;
       margin: 0 auto;
-      padding: 18px 18px 28px;
+      padding: 16px 16px 24px;
     }}
     h1, h2, h3, p {{ margin: 0; }}
     .topbar {{
       display: grid;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 10px;
+      margin-bottom: 14px;
     }}
     .topbar-row {{
       display: flex;
@@ -93,21 +105,23 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
       gap: 16px;
     }}
     .topbar h1 {{
-      font-size: 1.2rem;
-      font-weight: 650;
-      letter-spacing: -0.02em;
+      font-size: 1.28rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
     }}
     .topbar-copy {{
       color: var(--muted);
-      font-size: 0.93rem;
+      font-size: 0.92rem;
       line-height: 1.45;
-      max-width: 68ch;
+      max-width: 62ch;
     }}
     .panel {{
-      background: rgba(255, 250, 243, 0.92);
-      border: 1px solid rgba(222, 207, 184, 0.85);
-      border-radius: 18px;
-      box-shadow: 0 6px 18px rgba(70, 52, 28, 0.05);
+      background: rgba(255, 250, 243, 0.9);
+      border: 1px solid rgba(222, 207, 184, 0.9);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
     }}
     .toolbar {{
       padding: 0;
@@ -118,7 +132,8 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
     }}
     .control {{
       display: grid;
-      gap: 4px;
+      gap: 5px;
+      min-width: min(100%, 320px);
     }}
     label {{
       font-size: 0.78rem;
@@ -127,37 +142,57 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
     }}
     select {{
       border: 1px solid rgba(222, 207, 184, 0.95);
-      border-radius: 10px;
-      background: white;
-      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.94);
+      padding: 10px 12px;
       font: inherit;
       color: inherit;
+      min-height: 44px;
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
     }}
     .content {{
       display: block;
     }}
     .chart-panel {{
-      padding: 14px 16px 12px;
+      padding: 14px 14px 12px;
       display: grid;
-      gap: 10px;
+      gap: 12px;
     }}
     .chart-wrap {{
-      min-height: min(76vh, 720px);
+      min-height: clamp(360px, 72vh, 760px);
     }}
     .note {{
       color: var(--muted);
       line-height: 1.5;
     }}
-    .mono {{
-      font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
-    }}
     @media (max-width: 720px) {{
+      main {{
+        padding: 12px 10px 18px;
+      }}
       .topbar-row {{
         flex-direction: column;
         align-items: stretch;
+        gap: 10px;
       }}
       .control {{
         width: 100%;
+        min-width: 0;
+      }}
+      .topbar-copy {{
+        font-size: 0.88rem;
+      }}
+      .chart-panel {{
+        padding: 12px 10px 10px;
+        border-radius: 18px;
+      }}
+      .chart-wrap {{
+        min-height: min(68vh, 520px);
+      }}
+      #chart-title {{
+        font-size: 1.05rem;
+      }}
+      #chart-subtitle {{
+        font-size: 0.85rem;
       }}
     }}
   </style>
@@ -195,12 +230,25 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
     const subjectSelect = document.getElementById("subject-select");
     const chartTitle = document.getElementById("chart-title");
     const chartSubtitle = document.getElementById("chart-subtitle");
+    const compactViewport = window.matchMedia("(max-width: 720px)");
 
     for (const subject of payload.subject_order) {{
       subjectSelect.add(new Option(subject, subject));
     }}
 
     const colors = ["#165d8a", "#b6592b", "#25724d", "#7b4f9d", "#b79000", "#5a5f66"];
+    function isCompactViewport() {{
+      return compactViewport.matches;
+    }}
+
+    function formatSemesterLabel(label, compact = false) {{
+      const [year, season] = label.split(" ");
+      if (!compact) {{
+        return [year, season];
+      }}
+      return [year, season === "kevät" ? "k" : "s"];
+    }}
+
     const chart = new Chart(document.getElementById("chart"), {{
       type: "line",
       data: {{ labels: [], datasets: [] }},
@@ -208,12 +256,52 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
         responsive: true,
         maintainAspectRatio: false,
         interaction: {{ mode: "nearest", intersect: false }},
+        layout: {{
+          padding: {{ top: 6, right: 4, bottom: 0, left: 0 }}
+        }},
+        plugins: {{
+          legend: {{
+            position: "bottom",
+            labels: {{
+              usePointStyle: true,
+              pointStyle: "circle",
+              boxWidth: 8,
+              boxHeight: 8,
+              padding: 14,
+              color: "#201a14",
+            }}
+          }},
+          tooltip: {{
+            callbacks: {{
+              title: (items) => items[0]?.label ?? "",
+              label: (item) => `${{item.dataset.label}}: ${{item.formattedValue}}`
+            }}
+          }}
+        }},
         scales: {{
+          x: {{
+            ticks: {{
+              color: "#6e665d",
+              maxRotation: 0,
+              autoSkip: false,
+              callback: function(value) {{
+                const label = this.getLabelForValue(value);
+                return formatSemesterLabel(label, isCompactViewport());
+              }}
+            }},
+            grid: {{
+              display: false
+            }}
+          }},
           y: {{
             beginAtZero: true,
             max: 1,
             ticks: {{
+              color: "#6e665d",
               callback: (value) => Number.isFinite(value) ? value.toFixed(2).replace(/\\.00$/, "") : value
+            }},
+            grid: {{
+              color: "rgba(110, 102, 93, 0.12)"
             }}
           }}
         }}
@@ -226,18 +314,28 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
         data: labels.map((semester) => valuesBySemester[semester] ?? null),
         borderColor: color,
         backgroundColor: color,
-        borderWidth: 2,
-        pointRadius: 4,
+        borderWidth: isCompactViewport() ? 2.2 : 2.4,
+        pointRadius: isCompactViewport() ? 3 : 4,
         pointHoverRadius: 6,
+        pointHitRadius: 18,
         spanGaps: false,
         tension: 0.18,
       }};
+    }}
+
+    function applyViewportOptions() {{
+      const compact = isCompactViewport();
+      chart.options.plugins.legend.labels.padding = compact ? 10 : 14;
+      chart.options.plugins.legend.labels.font = {{ size: compact ? 11 : 12 }};
+      chart.options.scales.x.ticks.font = {{ size: compact ? 11 : 12 }};
+      chart.options.scales.y.ticks.font = {{ size: compact ? 11 : 12 }};
     }}
 
     function updateChart() {{
       const subjectData = payload.subjects[subjectSelect.value];
       const labels = subjectData.availability.semesters;
 
+      applyViewportOptions();
       const datasets = payload.ytl_grades.map((grade, index) =>
         makeDataset(grade, subjectData.grades[grade], labels, colors[index % colors.length])
       );
@@ -250,6 +348,7 @@ def render_dashboard_html(payload: dict[str, Any], generated_at: str) -> str:
     }}
 
     subjectSelect.addEventListener("change", updateChart);
+    compactViewport.addEventListener("change", updateChart);
 
     subjectSelect.value = payload.subject_order[0];
     updateChart();

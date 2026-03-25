@@ -42,6 +42,8 @@ class DashboardTests(unittest.TestCase):
 
         self.assertIn("<h1>YO_graph</h1>", html)
         self.assertIn('id="subject-select"', html)
+        self.assertIn('window.matchMedia("(max-width: 720px)")', html)
+        self.assertIn("formatSemesterLabel", html)
         self.assertNotIn('id="grade-select"', html)
         self.assertNotIn('id="view-select"', html)
         self.assertNotIn('summary-title', html)
