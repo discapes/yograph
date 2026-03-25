@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>YO_graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --panel: #fffaf3;
+      --line: #decfb8;
+      --ink: #201a14;
+      --muted: #6e665d;
+      --accent: #165d8a;
+      --accent-2: #b6592b;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 18px 18px 28px;
+    }
+    h1, h2, h3, p { margin: 0; }
+    .topbar {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .topbar-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .topbar h1 {
+      font-size: 1.2rem;
+      font-weight: 650;
+      letter-spacing: -0.02em;
+    }
+    .topbar-copy {
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.45;
+      max-width: 68ch;
+    }
+    .panel {
+      background: rgba(255, 250, 243, 0.92);
+      border: 1px solid rgba(222, 207, 184, 0.85);
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(70, 52, 28, 0.05);
+    }
+    .toolbar {
+      padding: 0;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .control {
+      display: grid;
+      gap: 4px;
+    }
+    label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    select {
+      border: 1px solid rgba(222, 207, 184, 0.95);
+      border-radius: 10px;
+      background: white;
+      padding: 8px 10px;
+      font: inherit;
+      color: inherit;
+    }
+    .content {
+      display: block;
+    }
+    .chart-panel {
+      padding: 14px 16px 12px;
+      display: grid;
+      gap: 10px;
+    }
+    .chart-wrap {
+      min-height: min(76vh, 720px);
+    }
+    .note {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .mono {
+      font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
+    }
+    @media (max-width: 720px) {
+      .topbar-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .control {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="topbar">
+      <div class="topbar-row">
+        <h1>YO_graph</h1>
+        <div class="toolbar">
+          <div class="control">
+            <label for="subject-select">Subject</label>
+            <select id="subject-select"></select>
+          </div>
+        </div>
+      </div>
+      <p class="topbar-copy">Official YTL matriculation exam thresholds, normalized by each subject’s maximum score.</p>
+    </section>
+    <section class="content">
+      <section class="panel chart-panel">
+        <div>
+          <h2 id="chart-title"></h2>
+          <p id="chart-subtitle" class="note"></p>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart"></canvas>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script id="dashboard-data" type="application/json">{"subjects": {"Matematiikka (pitkä)": {"grades": {"L": {"2025 syksy": 0.7083333333333334, "2025 kevät": 0.85, "2024 syksy": 0.775, "2024 kevät": 0.7416666666666667, "2023 syksy": 0.75, "2023 kevät": 0.675, "2022 syksy": 0.7916666666666666, "2022 kevät": 0.775, "2021 syksy": 0.825, "2021 kevät": 0.6833333333333333}, "E": {"2025 syksy": 0.5416666666666666, "2025 kevät": 0.6833333333333333, "2024 syksy": 0.5583333333333333, "2024 kevät": 0.5916666666666667, "2023 syksy": 0.6083333333333333, "2023 kevät": 0.525, "2022 syksy": 0.5916666666666667, "2022 kevät": 0.5833333333333334, "2021 syksy": 0.6166666666666667, "2021 kevät": 0.475}, "M": {"2025 syksy": 0.4, "2025 kevät": 0.525, "2024 syksy": 0.38333333333333336, "2024 kevät": 0.475, "2023 syksy": 0.4666666666666667, "2023 kevät": 0.4166666666666667, "2022 syksy": 0.45, "2022 kevät": 0.44166666666666665, "2021 syksy": 0.49166666666666664, "2021 kevät": 0.3416666666666667}, "C": {"2025 syksy": 0.2833333333333333, "2025 kevät": 0.38333333333333336, "2024 syksy": 0.25, "2024 kevät": 0.35833333333333334, "2023 syksy": 0.3333333333333333, "2023 kevät": 0.30833333333333335, "2022 syksy": 0.30833333333333335, "2022 kevät": 0.30833333333333335, "2021 syksy": 0.3416666666666667, "2021 kevät": 0.25}, "B": {"2025 syksy": 0.18333333333333332, "2025 kevät": 0.275, "2024 syksy": 0.14166666666666666, "2024 kevät": 0.25833333333333336, "2023 syksy": 0.25, "2023 kevät": 0.2, "2022 syksy": 0.21666666666666667, "2022 kevät": 0.20833333333333334, "2021 syksy": 0.225, "2021 kevät": 0.16666666666666666}, "A": {"2025 syksy": 0.11666666666666667, "2025 kevät": 0.19166666666666668, "2024 syksy": 0.1, "2024 kevät": 0.16666666666666666, "2023 syksy": 0.16666666666666666, "2023 kevät": 0.125, "2022 syksy": 0.13333333333333333, "2022 kevät": 0.13333333333333333, "2021 syksy": 0.11666666666666667, "2021 kevät": 0.11666666666666667}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.7083333333333334, "E": 0.5416666666666666, "M": 0.4, "C": 0.2833333333333333, "B": 0.18333333333333332, "A": 0.11666666666666667}}, "Fysiikka": {"grades": {"L": {"2025 syksy": 0.7166666666666667, "2025 kevät": 0.775, "2024 syksy": 0.7083333333333334, "2024 kevät": 0.7416666666666667, "2023 syksy": 0.7166666666666667, "2023 kevät": 0.675, "2022 syksy": 0.6916666666666667, "2022 kevät": 0.7083333333333334, "2021 syksy": 0.7083333333333334, "2021 kevät": 0.7583333333333333}, "E": {"2025 syksy": 0.5416666666666666, "2025 kevät": 0.6, "2024 syksy": 0.525, "2024 kevät": 0.575, "2023 syksy": 0.5333333333333333, "2023 kevät": 0.5083333333333333, "2022 syksy": 0.48333333333333334, "2022 kevät": 0.5166666666666667, "2021 syksy": 0.5416666666666666, "2021 kevät": 0.5916666666666667}, "M": {"2025 syksy": 0.4083333333333333, "2025 kevät": 0.44166666666666665, "2024 syksy": 0.36666666666666664, "2024 kevät": 0.43333333333333335, "2023 syksy": 0.375, "2023 kevät": 0.39166666666666666, "2022 syksy": 0.35, "2022 kevät": 0.36666666666666664, "2021 syksy": 0.4, "2021 kevät": 0.45}, "C": {"2025 syksy": 0.26666666666666666, "2025 kevät": 0.31666666666666665, "2024 syksy": 0.23333333333333334, "2024 kevät": 0.30833333333333335, "2023 syksy": 0.25, "2023 kevät": 0.2916666666666667, "2022 syksy": 0.24166666666666667, "2022 kevät": 0.23333333333333334, "2021 syksy": 0.275, "2021 kevät": 0.31666666666666665}, "B": {"2025 syksy": 0.16666666666666666, "2025 kevät": 0.20833333333333334, "2024 syksy": 0.15, "2024 kevät": 0.21666666666666667, "2023 syksy": 0.16666666666666666, "2023 kevät": 0.21666666666666667, "2022 syksy": 0.19166666666666668, "2022 kevät": 0.15, "2021 syksy": 0.18333333333333332, "2021 kevät": 0.21666666666666667}, "A": {"2025 syksy": 0.1, "2025 kevät": 0.13333333333333333, "2024 syksy": 0.10833333333333334, "2024 kevät": 0.14166666666666666, "2023 syksy": 0.125, "2023 kevät": 0.15833333333333333, "2022 syksy": 0.125, "2022 kevät": 0.1, "2021 syksy": 0.10833333333333334, "2021 kevät": 0.14166666666666666}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.7166666666666667, "E": 0.5416666666666666, "M": 0.4083333333333333, "C": 0.26666666666666666, "B": 0.16666666666666666, "A": 0.1}}, "Kirjoitustaito (suomi)": {"grades": {"L": {"2025 syksy": 0.7333333333333333, "2025 kevät": 0.75, "2024 syksy": 0.725, "2024 kevät": 0.75, "2023 syksy": 0.7333333333333333, "2023 kevät": 0.7416666666666667, "2022 syksy": 0.7333333333333333, "2022 kevät": 0.7416666666666667, "2021 syksy": 0.75, "2021 kevät": 0.7583333333333333}, "E": {"2025 syksy": 0.625, "2025 kevät": 0.6166666666666667, "2024 syksy": 0.6083333333333333, "2024 kevät": 0.625, "2023 syksy": 0.625, "2023 kevät": 0.6083333333333333, "2022 syksy": 0.625, "2022 kevät": 0.6166666666666667, "2021 syksy": 0.6333333333333333, "2021 kevät": 0.6333333333333333}, "M": {"2025 syksy": 0.5333333333333333, "2025 kevät": 0.5166666666666667, "2024 syksy": 0.5166666666666667, "2024 kevät": 0.5083333333333333, "2023 syksy": 0.5083333333333333, "2023 kevät": 0.525, "2022 syksy": 0.5166666666666667, "2022 kevät": 0.5333333333333333, "2021 syksy": 0.5416666666666666, "2021 kevät": 0.55}, "C": {"2025 syksy": 0.425, "2025 kevät": 0.425, "2024 syksy": 0.4166666666666667, "2024 kevät": 0.425, "2023 syksy": 0.4166666666666667, "2023 kevät": 0.43333333333333335, "2022 syksy": 0.4166666666666667, "2022 kevät": 0.44166666666666665, "2021 syksy": 0.4166666666666667, "2021 kevät": 0.45}, "B": {"2025 syksy": 0.325, "2025 kevät": 0.3416666666666667, "2024 syksy": 0.31666666666666665, "2024 kevät": 0.3416666666666667, "2023 syksy": 0.30833333333333335, "2023 kevät": 0.3416666666666667, "2022 syksy": 0.31666666666666665, "2022 kevät": 0.3416666666666667, "2021 syksy": 0.30833333333333335, "2021 kevät": 0.3416666666666667}, "A": {"2025 syksy": 0.21666666666666667, "2025 kevät": 0.24166666666666667, "2024 syksy": 0.21666666666666667, "2024 kevät": 0.25, "2023 syksy": 0.20833333333333334, "2023 kevät": 0.23333333333333334, "2022 syksy": 0.225, "2022 kevät": 0.25, "2021 syksy": 0.21666666666666667, "2021 kevät": 0.24166666666666667}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.7333333333333333, "E": 0.625, "M": 0.5333333333333333, "C": 0.425, "B": 0.325, "A": 0.21666666666666667}}, "Lukutaito (suomi)": {"grades": {"L": {"2025 syksy": 0.7333333333333333, "2025 kevät": 0.75, "2024 syksy": 0.725, "2024 kevät": 0.75, "2023 syksy": 0.7333333333333333, "2023 kevät": 0.7416666666666667, "2022 syksy": 0.7333333333333333, "2022 kevät": 0.7416666666666667, "2021 syksy": 0.75, "2021 kevät": 0.7583333333333333}, "E": {"2025 syksy": 0.625, "2025 kevät": 0.6166666666666667, "2024 syksy": 0.6083333333333333, "2024 kevät": 0.625, "2023 syksy": 0.625, "2023 kevät": 0.6083333333333333, "2022 syksy": 0.625, "2022 kevät": 0.6166666666666667, "2021 syksy": 0.6333333333333333, "2021 kevät": 0.6333333333333333}, "M": {"2025 syksy": 0.5333333333333333, "2025 kevät": 0.5166666666666667, "2024 syksy": 0.5166666666666667, "2024 kevät": 0.5083333333333333, "2023 syksy": 0.5083333333333333, "2023 kevät": 0.525, "2022 syksy": 0.5166666666666667, "2022 kevät": 0.5333333333333333, "2021 syksy": 0.5416666666666666, "2021 kevät": 0.55}, "C": {"2025 syksy": 0.425, "2025 kevät": 0.425, "2024 syksy": 0.4166666666666667, "2024 kevät": 0.425, "2023 syksy": 0.4166666666666667, "2023 kevät": 0.43333333333333335, "2022 syksy": 0.4166666666666667, "2022 kevät": 0.44166666666666665, "2021 syksy": 0.4166666666666667, "2021 kevät": 0.45}, "B": {"2025 syksy": 0.325, "2025 kevät": 0.3416666666666667, "2024 syksy": 0.31666666666666665, "2024 kevät": 0.3416666666666667, "2023 syksy": 0.30833333333333335, "2023 kevät": 0.3416666666666667, "2022 syksy": 0.31666666666666665, "2022 kevät": 0.3416666666666667, "2021 syksy": 0.30833333333333335, "2021 kevät": 0.3416666666666667}, "A": {"2025 syksy": 0.21666666666666667, "2025 kevät": 0.24166666666666667, "2024 syksy": 0.21666666666666667, "2024 kevät": 0.25, "2023 syksy": 0.20833333333333334, "2023 kevät": 0.23333333333333334, "2022 syksy": 0.225, "2022 kevät": 0.25, "2021 syksy": 0.21666666666666667, "2021 kevät": 0.24166666666666667}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.7333333333333333, "E": 0.625, "M": 0.5333333333333333, "C": 0.425, "B": 0.325, "A": 0.21666666666666667}}, "Kemia": {"grades": {"L": {"2025 syksy": 0.875, "2025 kevät": 0.8, "2024 syksy": 0.8583333333333333, "2024 kevät": 0.8416666666666667, "2023 syksy": 0.825, "2023 kevät": 0.825, "2022 syksy": 0.8, "2022 kevät": 0.775, "2021 syksy": 0.8166666666666667, "2021 kevät": 0.8083333333333333}, "E": {"2025 syksy": 0.7416666666666667, "2025 kevät": 0.6416666666666667, "2024 syksy": 0.6833333333333333, "2024 kevät": 0.675, "2023 syksy": 0.6333333333333333, "2023 kevät": 0.6416666666666667, "2022 syksy": 0.6, "2022 kevät": 0.5833333333333334, "2021 syksy": 0.6333333333333333, "2021 kevät": 0.625}, "M": {"2025 syksy": 0.6083333333333333, "2025 kevät": 0.5083333333333333, "2024 syksy": 0.525, "2024 kevät": 0.5416666666666666, "2023 syksy": 0.475, "2023 kevät": 0.45, "2022 syksy": 0.44166666666666665, "2022 kevät": 0.425, "2021 syksy": 0.4666666666666667, "2021 kevät": 0.45}, "C": {"2025 syksy": 0.44166666666666665, "2025 kevät": 0.38333333333333336, "2024 syksy": 0.39166666666666666, "2024 kevät": 0.375, "2023 syksy": 0.325, "2023 kevät": 0.2833333333333333, "2022 syksy": 0.3, "2022 kevät": 0.24166666666666667, "2021 syksy": 0.30833333333333335, "2021 kevät": 0.275}, "B": {"2025 syksy": 0.2833333333333333, "2025 kevät": 0.24166666666666667, "2024 syksy": 0.25833333333333336, "2024 kevät": 0.25, "2023 syksy": 0.225, "2023 kevät": 0.18333333333333332, "2022 syksy": 0.19166666666666668, "2022 kevät": 0.15, "2021 syksy": 0.19166666666666668, "2021 kevät": 0.175}, "A": {"2025 syksy": 0.16666666666666666, "2025 kevät": 0.16666666666666666, "2024 syksy": 0.18333333333333332, "2024 kevät": 0.16666666666666666, "2023 syksy": 0.15, "2023 kevät": 0.125, "2022 syksy": 0.10833333333333334, "2022 kevät": 0.10833333333333334, "2021 syksy": 0.10833333333333334, "2021 kevät": 0.10833333333333334}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.875, "E": 0.7416666666666667, "M": 0.6083333333333333, "C": 0.44166666666666665, "B": 0.2833333333333333, "A": 0.16666666666666666}}, "Englanti (pitkä)": {"grades": {"L": {"2025 syksy": 0.9264214046822743, "2025 kevät": 0.9163879598662207, "2024 syksy": 0.9297658862876255, "2024 kevät": 0.9297658862876255, "2023 syksy": 0.9264214046822743, "2023 kevät": 0.8929765886287625, "2022 syksy": 0.9063545150501672, "2022 kevät": 0.8963210702341137, "2021 syksy": 0.903010033444816, "2021 kevät": 0.882943143812709}, "E": {"2025 syksy": 0.8662207357859532, "2025 kevät": 0.8528428093645485, "2024 syksy": 0.862876254180602, "2024 kevät": 0.8662207357859532, "2023 syksy": 0.8595317725752508, "2023 kevät": 0.8294314381270903, "2022 syksy": 0.842809364548495, "2022 kevät": 0.8294314381270903, "2021 syksy": 0.8361204013377926, "2021 kevät": 0.8160535117056856}, "M": {"2025 syksy": 0.8060200668896321, "2025 kevät": 0.7892976588628763, "2024 syksy": 0.7959866220735786, "2024 kevät": 0.7993311036789298, "2023 syksy": 0.7959866220735786, "2023 kevät": 0.7591973244147158, "2022 syksy": 0.782608695652174, "2022 kevät": 0.7625418060200669, "2021 syksy": 0.7725752508361204, "2021 kevät": 0.7525083612040134}, "C": {"2025 syksy": 0.7290969899665551, "2025 kevät": 0.7090301003344481, "2024 syksy": 0.7090301003344481, "2024 kevät": 0.7090301003344481, "2023 syksy": 0.7123745819397993, "2023 kevät": 0.6722408026755853, "2022 syksy": 0.7023411371237458, "2022 kevät": 0.6655518394648829, "2021 syksy": 0.6889632107023411, "2021 kevät": 0.6655518394648829}, "B": {"2025 syksy": 0.6287625418060201, "2025 kevät": 0.5852842809364549, "2024 syksy": 0.6053511705685619, "2024 kevät": 0.5752508361204013, "2023 syksy": 0.6086956521739131, "2023 kevät": 0.5585284280936454, "2022 syksy": 0.6053511705685619, "2022 kevät": 0.5518394648829431, "2021 syksy": 0.5785953177257525, "2021 kevät": 0.5585284280936454}, "A": {"2025 syksy": 0.5117056856187291, "2025 kevät": 0.4882943143812709, "2024 syksy": 0.5050167224080268, "2024 kevät": 0.4414715719063545, "2023 syksy": 0.4916387959866221, "2023 kevät": 0.43812709030100333, "2022 syksy": 0.49498327759197325, "2022 kevät": 0.4214046822742475, "2021 syksy": 0.45484949832775917, "2021 kevät": 0.46153846153846156}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.9264214046822743, "E": 0.8662207357859532, "M": 0.8060200668896321, "C": 0.7290969899665551, "B": 0.6287625418060201, "A": 0.5117056856187291}}, "Maantiede": {"grades": {"L": {"2025 syksy": 0.75, "2025 kevät": 0.775, "2024 syksy": 0.75, "2024 kevät": 0.75, "2023 syksy": 0.8166666666666667, "2023 kevät": 0.8, "2022 syksy": 0.8416666666666667, "2022 kevät": 0.7833333333333333, "2021 syksy": 0.8, "2021 kevät": 0.7916666666666666}, "E": {"2025 syksy": 0.6166666666666667, "2025 kevät": 0.6666666666666666, "2024 syksy": 0.625, "2024 kevät": 0.6166666666666667, "2023 syksy": 0.7083333333333334, "2023 kevät": 0.6833333333333333, "2022 syksy": 0.7416666666666667, "2022 kevät": 0.675, "2021 syksy": 0.675, "2021 kevät": 0.6833333333333333}, "M": {"2025 syksy": 0.5083333333333333, "2025 kevät": 0.575, "2024 syksy": 0.525, "2024 kevät": 0.5166666666666667, "2023 syksy": 0.6, "2023 kevät": 0.575, "2022 syksy": 0.65, "2022 kevät": 0.5666666666666667, "2021 syksy": 0.5583333333333333, "2021 kevät": 0.5666666666666667}, "C": {"2025 syksy": 0.39166666666666666, "2025 kevät": 0.475, "2024 syksy": 0.425, "2024 kevät": 0.39166666666666666, "2023 syksy": 0.49166666666666664, "2023 kevät": 0.475, "2022 syksy": 0.55, "2022 kevät": 0.45, "2021 syksy": 0.44166666666666665, "2021 kevät": 0.43333333333333335}, "B": {"2025 syksy": 0.2833333333333333, "2025 kevät": 0.35833333333333334, "2024 syksy": 0.31666666666666665, "2024 kevät": 0.2916666666666667, "2023 syksy": 0.39166666666666666, "2023 kevät": 0.36666666666666664, "2022 syksy": 0.4583333333333333, "2022 kevät": 0.3333333333333333, "2021 syksy": 0.3333333333333333, "2021 kevät": 0.30833333333333335}, "A": {"2025 syksy": 0.2, "2025 kevät": 0.26666666666666666, "2024 syksy": 0.225, "2024 kevät": 0.19166666666666668, "2023 syksy": 0.3, "2023 kevät": 0.26666666666666666, "2022 syksy": 0.375, "2022 kevät": 0.24166666666666667, "2021 syksy": 0.23333333333333334, "2021 kevät": 0.20833333333333334}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.75, "E": 0.6166666666666667, "M": 0.5083333333333333, "C": 0.39166666666666666, "B": 0.2833333333333333, "A": 0.2}}, "Biologia": {"grades": {"L": {"2025 syksy": 0.8416666666666667, "2025 kevät": 0.8, "2024 syksy": 0.85, "2024 kevät": 0.775, "2023 syksy": 0.8583333333333333, "2023 kevät": 0.7833333333333333, "2022 syksy": 0.8333333333333334, "2022 kevät": 0.8083333333333333, "2021 syksy": 0.8083333333333333, "2021 kevät": 0.8}, "E": {"2025 syksy": 0.7083333333333334, "2025 kevät": 0.675, "2024 syksy": 0.7083333333333334, "2024 kevät": 0.6333333333333333, "2023 syksy": 0.7333333333333333, "2023 kevät": 0.6416666666666667, "2022 syksy": 0.7, "2022 kevät": 0.675, "2021 syksy": 0.675, "2021 kevät": 0.6416666666666667}, "M": {"2025 syksy": 0.5916666666666667, "2025 kevät": 0.55, "2024 syksy": 0.5583333333333333, "2024 kevät": 0.5083333333333333, "2023 syksy": 0.6083333333333333, "2023 kevät": 0.5333333333333333, "2022 syksy": 0.575, "2022 kevät": 0.55, "2021 syksy": 0.5583333333333333, "2021 kevät": 0.5083333333333333}, "C": {"2025 syksy": 0.4666666666666667, "2025 kevät": 0.43333333333333335, "2024 syksy": 0.4166666666666667, "2024 kevät": 0.38333333333333336, "2023 syksy": 0.475, "2023 kevät": 0.4166666666666667, "2022 syksy": 0.44166666666666665, "2022 kevät": 0.425, "2021 syksy": 0.43333333333333335, "2021 kevät": 0.38333333333333336}, "B": {"2025 syksy": 0.35, "2025 kevät": 0.31666666666666665, "2024 syksy": 0.3, "2024 kevät": 0.2916666666666667, "2023 syksy": 0.375, "2023 kevät": 0.30833333333333335, "2022 syksy": 0.3333333333333333, "2022 kevät": 0.3333333333333333, "2021 syksy": 0.325, "2021 kevät": 0.2833333333333333}, "A": {"2025 syksy": 0.25833333333333336, "2025 kevät": 0.23333333333333334, "2024 syksy": 0.2, "2024 kevät": 0.2, "2023 syksy": 0.2833333333333333, "2023 kevät": 0.21666666666666667, "2022 syksy": 0.225, "2022 kevät": 0.225, "2021 syksy": 0.23333333333333334, "2021 kevät": 0.2}}, "availability": {"semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "latest_semester": "2025 syksy", "semester_count": 10}, "latest_thresholds": {"L": 0.8416666666666667, "E": 0.7083333333333334, "M": 0.5916666666666667, "C": 0.4666666666666667, "B": 0.35, "A": 0.25833333333333336}}}, "subject_order": ["Matematiikka (pitkä)", "Fysiikka", "Kirjoitustaito (suomi)", "Lukutaito (suomi)", "Kemia", "Englanti (pitkä)", "Maantiede", "Biologia"], "semesters": ["2021 kevät", "2021 syksy", "2022 kevät", "2022 syksy", "2023 kevät", "2023 syksy", "2024 kevät", "2024 syksy", "2025 kevät", "2025 syksy"], "ytl_grades": ["L", "E", "M", "C", "B", "A"]}</script>
+  <script>
+    const generatedAt = "2026-03-25 20:24:50 EET";
+    const payload = JSON.parse(document.getElementById("dashboard-data").textContent);
+    const subjectSelect = document.getElementById("subject-select");
+    const chartTitle = document.getElementById("chart-title");
+    const chartSubtitle = document.getElementById("chart-subtitle");
+
+    for (const subject of payload.subject_order) {
+      subjectSelect.add(new Option(subject, subject));
+    }
+
+    const colors = ["#165d8a", "#b6592b", "#25724d", "#7b4f9d", "#b79000", "#5a5f66"];
+    const chart = new Chart(document.getElementById("chart"), {
+      type: "line",
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: "nearest", intersect: false },
+        scales: {
+          y: {
+            beginAtZero: true,
+            max: 1,
+            ticks: {
+              callback: (value) => Number.isFinite(value) ? value.toFixed(2).replace(/\.00$/, "") : value
+            }
+          }
+        }
+      }
+    });
+
+    function makeDataset(label, valuesBySemester, labels, color) {
+      return {
+        label,
+        data: labels.map((semester) => valuesBySemester[semester] ?? null),
+        borderColor: color,
+        backgroundColor: color,
+        borderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        spanGaps: false,
+        tension: 0.18,
+      };
+    }
+
+    function updateChart() {
+      const subjectData = payload.subjects[subjectSelect.value];
+      const labels = subjectData.availability.semesters;
+
+      const datasets = payload.ytl_grades.map((grade, index) =>
+        makeDataset(grade, subjectData.grades[grade], labels, colors[index % colors.length])
+      );
+      chartTitle.textContent = subjectSelect.value;
+      chartSubtitle.textContent = `Official normalized thresholds across ${subjectData.availability.semester_count} semesters. Updated ${generatedAt}.`;
+
+      chart.data.labels = labels;
+      chart.data.datasets = datasets.filter((dataset) => dataset.data.some((value) => value !== null));
+      chart.update();
+    }
+
+    subjectSelect.addEventListener("change", updateChart);
+
+    subjectSelect.value = payload.subject_order[0];
+    updateChart();
+  </script>
+</body>
+</html>
